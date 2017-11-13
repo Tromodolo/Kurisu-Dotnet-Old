@@ -8,6 +8,10 @@ using KatBot.Database;
 using KatBot.Modules.Music;
 using KatBot.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using System.Timers;
+using System.Diagnostics;
+using Console = Colorful.Console;
 
 namespace KatBot
 {
@@ -15,11 +19,22 @@ namespace KatBot
     {
         private static DiscordSocketClient _client;
         private static CommandHandler _commands = new CommandHandler();
+        private static Stopwatch runTime = new Stopwatch();
+
+        public static string encryptionpass;
         public static Dictionary<ulong, DateTime> CommandTimer = new Dictionary<ulong, DateTime>();
-        public static AudioService audio = new AudioService();
         public static DatabaseHandler db = new DatabaseHandler();
         public static IServiceProvider services;
-        public static string encryptionpass;
+        public static Dictionary<string, string> serverprefixes = new Dictionary<string, string>();
+        public static BotData botData = new BotData();
+        public static int CommandUsage { get; set; }
+
+        public static Color KatClr = new Color(242, 78, 46); //Color to use in embeds 
+        public static System.Drawing.Color DefaultColor = System.Drawing.Color.FromArgb(28, 255, 145);
+        public static System.Drawing.Color ConfirmColor = System.Drawing.Color.FromArgb(28, 255, 73);
+        public static System.Drawing.Color ErrorColor = System.Drawing.Color.FromArgb(255, 43, 28);
+        public static System.Drawing.Color KurisuColor = System.Drawing.Color.FromArgb(252, 127, 118);
+
 
         public static DiscordSocketClient client
         {
@@ -31,11 +46,6 @@ namespace KatBot
             get { return _commands; }
         }
 
-        public static Dictionary<string, string> serverprefixes = new Dictionary<string, string>();
-        public static BotData botData = new BotData();
-        public static Color KatClr = new Color(242, 78, 46); //Color to use in embeds
-
-
         private static void Main(string[] args)
         {
                 new Katarina().MainAsync().GetAwaiter().GetResult();
@@ -45,40 +55,40 @@ namespace KatBot
         {
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = LogSeverity.Info, // Specify console verbose information level.
                 AlwaysDownloadUsers = true, // Start the cache off with updated information.
                 MessageCacheSize = 1000 // Tell discord.net how long to store messages (per channel).
             });
-            _client.Log += l // Register the console log event.
-                => Task.Run(()
-                    => Console.WriteLine($"{string.Format("{0:HH:mm:ss tt}", DateTime.Now)} - [{l.Severity}] {l.Source}: {l.Exception?.Message ?? l.Message}"));
 
             try
             {
-                Console.WriteLine("Enter encryption password:");
+                runTime.Start();
+                Console.WriteLine("Enter encryption password:", DefaultColor);
                 encryptionpass = ReadPassword();
                 botData = await db.fillBotDataAsync();
                 await _client.LoginAsync(TokenType.Bot, botData.bottoken);
             }
             catch
             {
-                Console.WriteLine("Something went wrong with logging in. Are you sure you entered the correct password?");
+                Console.WriteLine("Something went wrong with logging in. Are you sure you entered the correct password?", ErrorColor);
                 Console.ReadLine();
                 Environment.Exit(0);
             }
             await _client.StartAsync();
 
             services = ConfigureServices();
-
             await _commands.Install(_client, services);
 
-            await Task.Delay(
-                2000); //add extra delay so the bot has time to connect and have a ready status before writing connected message
+            //add extra delay so the bot has time to connect and have a ready status before writing connected message
+            await Task.Delay(2000); 
 
-            Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
+            Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}", KurisuColor);
+
             await _client.SetGameAsync("k?commands for Command List");
 
+            //Register client events
             _client.RoleDeleted += _client_RoleDeleted; //In case of role deletion, remove it from database.
+            _client.LeftGuild += _client_LeftGuild;
+            _client.JoinedGuild += _client_JoinedGuild;
 
             foreach(IGuild guild in _client.Guilds)
             {
@@ -93,7 +103,33 @@ namespace KatBot
                 }
             }
 
+            Timer statsTimer = new Timer();
+            statsTimer.Interval = 1000;
+            statsTimer.Elapsed += StatsTimer_Elapsed;
+            statsTimer.Start();
+
             await Task.Delay(-1);
+        }
+
+        private void StatsTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Console.SetCursorPosition(0, 3);
+            Console.WriteLine("Guilds:        " + _client.Guilds.Count, DefaultColor);
+            Console.WriteLine("Users:         " + _client.Guilds.SelectMany(x => x.Users).Count().ToString(), DefaultColor);
+            Console.WriteLine("Uptime:        " + runTime.Elapsed.ToString("hh\\:mm\\:ss"), DefaultColor);
+            Console.WriteLine("Commands Run:  " + CommandUsage, DefaultColor);
+        }
+
+        private Task _client_JoinedGuild(SocketGuild arg)
+        {
+            Console.WriteLine("Joined server: " + arg.Name, ConfirmColor);
+            return Task.CompletedTask;
+        }
+
+        private Task _client_LeftGuild(SocketGuild arg)
+        {
+            Console.WriteLine("Left server: " + arg.Name, ErrorColor);
+            return Task.CompletedTask;
         }
 
         private async Task _client_RoleDeleted(SocketRole arg)
@@ -112,12 +148,6 @@ namespace KatBot
                 .AddSingleton(new AudioService())
                 .AddSingleton(new InteractiveService(_client))
                 .BuildServiceProvider();
-        }
-
-        private Task Log(LogMessage message)
-        {
-            Console.WriteLine(message.ToString());
-            return Task.CompletedTask;
         }
 
         public static string ReadPassword()

@@ -53,9 +53,7 @@ namespace KatBot.Services
                 result = await _cmds.ExecuteAsync(context, argPos, services);
                 if (result.IsSuccess)
                 {
-                    Console.WriteLine("\nCommand " + s.Content + " used by user " + s.Author + ":");
-                    Console.WriteLine("In Server: " + guild.Name + $" ({guild.Id})");
-                    Console.WriteLine("In Channel: " + s.Channel.Name + $" ({s.Channel.Id})");
+                    Katarina.CommandUsage++;
                 }
                 else if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
                 {
