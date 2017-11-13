@@ -105,19 +105,26 @@ namespace KatBot
 
             Timer statsTimer = new Timer();
             statsTimer.Interval = 1000;
-            statsTimer.Elapsed += StatsTimer_Elapsed;
+            statsTimer.Elapsed += updateStats;
             statsTimer.Start();
 
             await Task.Delay(-1);
         }
 
-        private void StatsTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void updateStats(object sender, ElapsedEventArgs e)
         {
+            int origLeft = Console.CursorLeft;
+            int origTop = Console.CursorTop;
+
+            if (origTop < 7)
+                origTop = 7;
+
             Console.SetCursorPosition(0, 3);
             Console.WriteLine("Guilds:        " + _client.Guilds.Count, DefaultColor);
             Console.WriteLine("Users:         " + _client.Guilds.SelectMany(x => x.Users).Count().ToString(), DefaultColor);
             Console.WriteLine("Uptime:        " + runTime.Elapsed.ToString("hh\\:mm\\:ss"), DefaultColor);
             Console.WriteLine("Commands Run:  " + CommandUsage, DefaultColor);
+            Console.SetCursorPosition(0, origTop);
         }
 
         private Task _client_JoinedGuild(SocketGuild arg)
