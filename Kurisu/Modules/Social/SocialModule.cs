@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using KurisuBot.Services.EmbedExtensions;
 using System;
+using System.Linq;
 
 namespace KurisuBot.Modules
 {
@@ -58,6 +59,8 @@ namespace KurisuBot.Modules
             }
             else
             {
+                person1 = FirstCharToUpper(person1);
+                person2 = FirstCharToUpper(person2);
                 int person1Value = 0, person2Value = 0, randomSeed = 0;
 
                 foreach (var s in person1.ToLower())
@@ -73,35 +76,51 @@ namespace KurisuBot.Modules
 
                 var lovePower = rand.Next(0, 100) + 1;
 
+                EmbedFieldBuilder person1field = new EmbedFieldBuilder().WithIsInline(true).WithName("Person 1:").WithValue(person1);
+                EmbedFieldBuilder person2field = new EmbedFieldBuilder().WithIsInline(true).WithName("Person 2:").WithValue(person2);
+                EmbedFieldBuilder predictionfield = new EmbedFieldBuilder().WithIsInline(false).WithName("Prediction:").WithValue(person1);
+                EmbedBuilder embed = new EmbedBuilder().WithColor(Kurisu.KurisuClr);
+
                 switch (lovePower)
                 {
                     case int i when i >= 1 && i <= 20:
-                        await Context.Channel.SendColouredEmbedAsync($":crystal_ball: **({lovePower}%)** \n" +
-                                                                     $"{printLoveBar(lovePower)}\n" +
-                                                                     $"{person1} and {person2} don't seem to fit well together at all. :broken_heart:", Kurisu.KurisuClr);
+                        predictionfield.Value = $":crystal_ball: **({lovePower}%)** \n\n" +
+                                                $"{printLoveBar(lovePower)}\n\n" +
+                                                $"{person1} and {person2} don't seem to fit well together at all. :broken_heart:";
                         break;
                     case int i when i >= 21 && i <= 40:
-                        await Context.Channel.SendColouredEmbedAsync($":crystal_ball: **({lovePower}%)** \n" +
-                                                                     $"{printLoveBar(lovePower)}\n" +
-                                                                     $"{person1} and {person2} are not likely to work out.", Kurisu.KurisuClr);
+                        predictionfield.Value = $":crystal_ball: **({lovePower}%)** \n\n" +
+                                                $"{printLoveBar(lovePower)}\n\n" +
+                                                $"{person1} and {person2} are not likely to work out.";
                         break;
                     case int i when i >= 41 && i <= 60:
-                        await Context.Channel.SendColouredEmbedAsync($":crystal_ball: **({lovePower}%)** \n" +
-                                                                     $"{printLoveBar(lovePower)}\n" +
-                                                                     $"{person1} and {person2} might have a chance together.", Kurisu.KurisuClr);
+                        predictionfield.Value = $":crystal_ball: **({lovePower}%)** \n\n" +
+                                                $"{printLoveBar(lovePower)}\n\n" +
+                                                $"{person1} and {person2} might have a chance together.";
                         break;
                     case int i when i >= 61 && i <= 80:
-                        await Context.Channel.SendColouredEmbedAsync($":crystal_ball: **({lovePower}%)** \n" +
-                                                                     $"{printLoveBar(lovePower)}\n" +
-                                                                     $"{person1} and {person2} fit well for each other.", Kurisu.KurisuClr);
+                        predictionfield.Value = $":crystal_ball: **({lovePower}%)** \n\n" +
+                                                $"{printLoveBar(lovePower)}\n\n" +
+                                                $"{person1} and {person2} fit well for each other.";
                         break;
                     case int i when i >= 81 && i <= 100:
-                        await Context.Channel.SendColouredEmbedAsync($":crystal_ball: **({lovePower}%)** \n" +
-                                                                     $"{printLoveBar(lovePower)}\n" +
-                                                                     $"{person1} and {person2} are perfect for each other! :heart:", Kurisu.KurisuClr);
+                        predictionfield.Value = $":crystal_ball: **({lovePower}%)** \n\n" +
+                                                $"{printLoveBar(lovePower)}\n\n" +
+                                                $"{person1} and {person2} are perfect for each other! :heart:";
                         break;
-                        
                 }
+                embed.AddField(person1field).AddField(person2field).AddField(predictionfield);
+                await ReplyAsync("", embed: embed.Build());
+            }
+        }
+
+        public static string FirstCharToUpper(string input)
+        {
+            switch (input)
+            {
+                case null: throw new ArgumentNullException(nameof(input));
+                case "": throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input));
+                default: return input.First().ToString().ToUpper() + input.Substring(1);
             }
         }
 
