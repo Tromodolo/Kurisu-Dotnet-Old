@@ -57,7 +57,7 @@ namespace KurisuBot.Modules.Fun
         public async Task Random(int maxNumber = 100)
         {
             var rand = new Random();
-            var result = rand.Next(0, maxNumber);
+            var result = rand.Next(0, maxNumber + 1);
             await ReplyAsync($":game_die: {result}");
         }
 
