@@ -91,22 +91,37 @@ namespace KurisuBot.Modules.Owner
             }
         }
 
-        [Command("xdify", RunMode = RunMode.Async)]
+        [Command("xdify")]
         [RequireOwner]
         public async Task xD()
         {
             IGuild Hangout = Kurisu.client.Guilds.Single(x => x.Id == 331573354291265548);
-            foreach(IGuildUser user in await Hangout.GetUsersAsync())
+            foreach(IGuildUser user in Kurisu.client.GetGuild(331573354291265548).Users)
             {
+                if (user.Id == 123184215423582208)
+                    return;
                 try
                 {
+                    if (user.Nickname == "xD")
+                        return;
+
                     await user.ModifyAsync(x => x.Nickname = "xD");
                 }
-                catch
+                catch(Exception e)
                 {
+                    await Context.Channel.SendMessageAsync(e.Message);
                     return;
                 }
             }
+        }
+        [Command("make eve shut up", RunMode = RunMode.Async)]
+        [RequireOwner]
+        public async Task STFU()
+        {
+            var eve = Kurisu.client.GetGuild(331573354291265548).Users.Single(x => x.Id == 244455224570281984);
+            var muted = Kurisu.client.GetGuild(331573354291265548).Roles.Single(x => x.Id == 376452430268858381);
+
+            await eve.AddRoleAsync(muted);
         }
     }
 }

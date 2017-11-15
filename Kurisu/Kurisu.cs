@@ -83,6 +83,7 @@ namespace KurisuBot
             await Task.Delay(2000); 
 
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}", KurisuColor);
+            Console.WriteLine("-\n-\n-\n");
 
             await _client.SetGameAsync("k?commands for Command List");
 
@@ -117,10 +118,10 @@ namespace KurisuBot
             int origLeft = Console.CursorLeft;
             int origTop = Console.CursorTop;
 
-            if (origTop < 7)
-                origTop = 7;
+            if (origTop < 9)
+                origTop = 9;
 
-            Console.SetCursorPosition(0, 3);
+            Console.SetCursorPosition(0, 5);
             Console.WriteLine("Guilds:        " + _client.Guilds.Count, DefaultColor);
             Console.WriteLine("Users:         " + _client.Guilds.SelectMany(x => x.Users).Count().ToString(), DefaultColor);
             Console.WriteLine("Uptime:        " + runTime.Elapsed.ToString("hh\\:mm\\:ss"), DefaultColor);
