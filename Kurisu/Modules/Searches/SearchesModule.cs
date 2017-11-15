@@ -190,11 +190,14 @@ namespace KurisuBot.Modules.Searches
             var animeResult = await MAL.SearchAsync(anime);
 
             string animeLink = "",
-                animeName = "",
-                animeSynposis = "",
-                animeImageUrl = "",
-                episodeCount = "",
-                animeStatus = "";
+                   animeName = "",
+                   animeSynposis = "",
+                   animeImageUrl = "",
+                   episodeCount = "",
+                   animeStatus = "",
+                   animeType = "";
+            DateTime animeStartAiring,
+                   animeEndAiring;
             var animeRating = 0.0;
 
             if (!animeResult.Any())
@@ -209,7 +212,21 @@ namespace KurisuBot.Modules.Searches
             animeImageUrl = animeResult.First().Image;
             animeRating = animeResult.First().Score;
             animeStatus = animeResult.First().Status;
+            animeType = animeResult.First().Type;
+            DateTime.TryParse(animeResult.First().StartDate.ToString(), out animeStartAiring);
+            DateTime.TryParse(animeResult.First().EndDate.ToString(), out animeEndAiring);
 
+            string startString = animeStartAiring.ToString("MMM dd, yyyy");
+            string endString = animeEndAiring.ToString("MMM dd, yyyy");
+
+            startString = FirstCharToUpper(startString);
+            endString = FirstCharToUpper(endString);
+
+            if (startString == "Jan 01, 0001")
+                startString = "N/A";
+            if (endString == "Jan 01, 0001")
+                endString = "N/A";
+                
             if (animeResult.First().Episodes == 0 && !(animeResult.First().Status == "Not yet aired"))
                 episodeCount = "Over 775";
             else
@@ -218,17 +235,29 @@ namespace KurisuBot.Modules.Searches
             if (animeSynposis.Length > 500)
                 animeSynposis = animeSynposis.Substring(0, 500) + "...";
 
-            var embed = new EmbedBuilder().AddField(new EmbedFieldBuilder().WithName(animeName).WithValue(animeSynposis)
-                    .WithIsInline(false))
-                .AddField(new EmbedFieldBuilder().WithName("Episodes:").WithValue(episodeCount).WithIsInline(true))
-                .AddField(new EmbedFieldBuilder().WithName("Rating:").WithValue(animeRating).WithIsInline(true))
-                .AddField(new EmbedFieldBuilder().WithName("Status:").WithValue($"{animeStatus}").WithIsInline(true))
-                .WithThumbnailUrl(animeImageUrl)
-                .WithColor(Kurisu.KurisuClr)
-                .WithFooter(new EmbedFooterBuilder().WithText($"Url: {animeLink}"));
+            var embed = new EmbedBuilder().WithTitle(animeName)
+                                          .WithDescription($"\n[{animeLink}]({animeLink})\n")
+                                          .AddField(new EmbedFieldBuilder().WithName("Type:").WithValue(animeType).WithIsInline(true))
+                                          .AddField(new EmbedFieldBuilder().WithName("Episodes:").WithValue(episodeCount).WithIsInline(true))
+                                          .AddField(new EmbedFieldBuilder().WithName("Rating:").WithValue(animeRating).WithIsInline(true))
+                                          .AddField(new EmbedFieldBuilder().WithName("Status:").WithValue($"{animeStatus}").WithIsInline(true))
+                                          .AddField(new EmbedFieldBuilder().WithName("Airing Date:").WithValue($"{startString} - {endString}").WithIsInline(true))
+                                          .AddField(new EmbedFieldBuilder().WithName("Description").WithValue(animeSynposis + $"\n[Read More]({animeLink})").WithIsInline(false))
+                                          .WithThumbnailUrl(animeImageUrl)
+                                          .WithColor(Kurisu.KurisuClr);
 
 
             await ReplyAsync("", embed: embed.Build());
+        }
+
+        public static string FirstCharToUpper(string input)
+        {
+            switch (input)
+            {
+                case null: throw new ArgumentNullException(nameof(input));
+                case "": throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input));
+                default: return input.First().ToString().ToUpper() + input.Substring(1);
+            }
         }
     }
 }
