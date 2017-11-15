@@ -19,8 +19,6 @@ namespace KurisuBot.Modules.Moderation
         [RequireUserPermission(GuildPermission.BanMembers)]
         public async Task Ban(SocketGuildUser BanUser = null, [Remainder] string reason = null)
         {
-            await Context.Message.DeleteAsync();
-
             if (BanUser == null)
                 await Context.Channel.SendErrorAsync("You need to specify a user to ban.");
             else if (BanUser == Context.Message.Author)
@@ -73,8 +71,6 @@ namespace KurisuBot.Modules.Moderation
         [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task Kick(SocketGuildUser KickUser = null, [Remainder] string reason = null)
         {
-            await Context.Message.DeleteAsync();
-
             if (KickUser == null)
                 await Context.Channel.SendErrorAsync("You need to specify a user to kick.");
             else if (KickUser == Context.Message.Author)
@@ -155,8 +151,6 @@ namespace KurisuBot.Modules.Moderation
         [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task setrole([Remainder] IRole role)
         {
-            await Context.Message.DeleteAsync();
-
             try
             {
                 var authorPos = (Context.Message.Author as SocketGuildUser).Hierarchy;
@@ -192,8 +186,6 @@ namespace KurisuBot.Modules.Moderation
         [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task unsetRole([Remainder] IRole role)
         {
-            await Context.Message.DeleteAsync();
-
             if (await Kurisu.db.checkServerRole(role))
             {
                 await Kurisu.db.removeRole(role);

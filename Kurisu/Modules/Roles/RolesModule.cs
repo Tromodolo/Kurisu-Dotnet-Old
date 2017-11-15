@@ -14,8 +14,6 @@ namespace KurisuBot.Modules.Roles
         [Remarks("roles")]
         public async Task roles()
         {
-            await Context.Message.DeleteAsync();
-
             var results = await Kurisu.db.getServerRole(Context.Guild.Id);
             if (results.Length > 1)
                 await Context.Channel.SendColouredEmbedAsync("The list of roles available in this server:", results,
@@ -30,8 +28,6 @@ namespace KurisuBot.Modules.Roles
         [Remarks("giverole civilian")]
         public async Task giveRole([Remainder] IRole role)
         {
-            await Context.Message.DeleteAsync();
-
             if (await Kurisu.db.checkServerRole(role))
             {
                 await (Context.Message.Author as IGuildUser).AddRoleAsync(role);
@@ -49,8 +45,6 @@ namespace KurisuBot.Modules.Roles
         [Remarks("takeRole civilian")]
         public async Task takeRole([Remainder] IRole role)
         {
-            await Context.Message.DeleteAsync();
-
             if (await Kurisu.db.checkServerRole(role))
             {
                 await (Context.Message.Author as IGuildUser).RemoveRoleAsync(role);
