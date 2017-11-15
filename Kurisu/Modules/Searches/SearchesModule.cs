@@ -32,7 +32,7 @@ namespace KurisuBot.Modules.Searches
                                                                      $"\n{results.Items[2].Title}\n[Read More]({results.Items[2].DisplayLink})")
                                                           .WithIsInline(false);
 
-                var embed = new EmbedBuilder().WithTitle($"**Searched for: {query}**")
+                var embed = new EmbedBuilder().WithTitle($"**Searched for: \"{query}\"**")
                                               .WithColor(Kurisu.KurisuClr);
 
                 embed.AddField(firstResult).AddField(otherResults);
@@ -169,11 +169,14 @@ namespace KurisuBot.Modules.Searches
                 definition = definitions.First().Definition;
             }
 
-            var embed = new EmbedBuilder().WithTitle($"**Top definition for {word}:**")
-                .WithUrl($"{defLink}")
-                .WithColor(Kurisu.KurisuClr)
-                .WithDescription($"\n{definition}");
+            EmbedFieldBuilder topDefinition = new EmbedFieldBuilder().WithName("Top Definition for: \"" + word + "\"");
 
+            if (definition != "No definitions found")
+                topDefinition.Value = definition + $"\n[Read More]({defLink})";
+
+            var embed = new EmbedBuilder().WithColor(Kurisu.KurisuClr);
+
+            embed.AddField(topDefinition);
 
             await ReplyAsync("", embed: embed.Build());
         }
