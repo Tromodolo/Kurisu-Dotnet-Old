@@ -14,18 +14,35 @@ namespace KurisuBot.Modules.Searches
         [Command("google")]
         public async Task Google([Remainder] string query)
         {
-            await Context.Channel.TriggerTypingAsync();
-            var google = new GoogleService();
+            try
+            {
+                await Context.Channel.TriggerTypingAsync();
+                var google = new GoogleService();
 
-            var results = await google.GoogleSearchAsync(query);
+                var results = await google.GoogleSearchAsync(query);
 
-            var embed = new EmbedBuilder().WithTitle($"**{results.Items[0].Title}**")
-                                          .WithUrl(results.Items[0].Link)
-                                          .WithColor(Kurisu.KurisuClr)
-                                          .WithDescription($"\n{results.Items[0].Snippet}")
-                                          .WithFooter(new EmbedFooterBuilder().WithText($"{results.Items[0].Link}"));
-             
-            await ReplyAsync("", embed: embed.Build());
+
+                var firstResult = new EmbedFieldBuilder().WithName("Top Result:")
+                                                         .WithValue($"\n[{results.Items[0].Title}]({results.Items[0].DisplayLink})" +
+                                                                    $"\n{results.Items[0].Snippet}\n[Read More]({results.Items[0].DisplayLink})")
+                                                         .WithIsInline(false);
+
+                var otherResults = new EmbedFieldBuilder().WithName("Also see:")
+                                                          .WithValue($"\n{results.Items[1].Title}\n[Read More]({results.Items[1].DisplayLink})" +
+                                                                     $"\n{results.Items[2].Title}\n[Read More]({results.Items[2].DisplayLink})")
+                                                          .WithIsInline(false);
+
+                var embed = new EmbedBuilder().WithTitle($"**Searched for: {query}**")
+                                              .WithColor(Kurisu.KurisuClr);
+
+                embed.AddField(firstResult).AddField(otherResults);
+
+                await ReplyAsync("", embed: embed.Build());
+            }
+            catch(Exception e) 
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         [Command("osutop", RunMode = RunMode.Async)]
