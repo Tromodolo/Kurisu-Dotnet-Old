@@ -23,13 +23,13 @@ namespace KurisuBot.Modules.Searches
 
 
                 var firstResult = new EmbedFieldBuilder().WithName("Top Result:")
-                                                         .WithValue($"\n[{results.Items[0].Title}]({results.Items[0].DisplayLink})" +
-                                                                    $"\n{results.Items[0].Snippet}\n[Read More]({results.Items[0].DisplayLink})")
+                                                         .WithValue($"\n[{results.Items[0].Title}]({results.Items[0].Link})" +
+                                                                    $"\n{results.Items[0].Snippet}\n[Read More]({results.Items[0].Link})")
                                                          .WithIsInline(false);
 
                 var otherResults = new EmbedFieldBuilder().WithName("Also see:")
-                                                          .WithValue($"\n{results.Items[1].Title}\n[Read More]({results.Items[1].DisplayLink})" +
-                                                                     $"\n{results.Items[2].Title}\n[Read More]({results.Items[2].DisplayLink})")
+                                                          .WithValue($"\n{results.Items[1].Title}\n[Read More]({results.Items[1].Link})" +
+                                                                     $"\n{results.Items[2].Title}\n[Read More]({results.Items[2].Link})")
                                                           .WithIsInline(false);
 
                 var embed = new EmbedBuilder().WithTitle($"**Searched for: \"{query}\"**")
