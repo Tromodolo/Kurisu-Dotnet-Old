@@ -1,0 +1,12 @@
+{
+  "commands": [
+    {
+      "name": "Avatar",
+      "command": "avatar",
+      "module": "Social",
+      "description": "Gets avatar of user, or yourself if unspecified",
+      "usage": "k?avatar tromo"
+    },
+    {}
+  ]
+}
