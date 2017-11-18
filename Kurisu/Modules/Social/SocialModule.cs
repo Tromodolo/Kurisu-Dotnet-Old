@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using KurisuBot.Services.EmbedExtensions;
 using System;
 using System.Linq;
+using System.IO;
 
 namespace KurisuBot.Modules
 {
@@ -128,7 +129,9 @@ namespace KurisuBot.Modules
         [Command("pet")]
         public async Task Pet([Remainder] SocketGuildUser petTarget = null)
         {
-            var petNum = new Random().Next(0, 13) + 1;
+            int fileCount = Directory.GetFiles(@"./data/PetImages/").Length;
+
+            var petNum = new Random().Next(0, fileCount) + 1;
 
             if (petTarget == null)
                 await Context.Channel.SendImageEmbedWithoutTitleAsync($"http://tromo.xyz/PetImages/{petNum}.gif", $":heart: *Pets {Context.Message.Author.Mention}*");
